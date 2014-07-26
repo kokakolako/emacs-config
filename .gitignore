@@ -1,0 +1,5 @@
+.org-id-locations
+session*
+tetris-scores
+*.elc
+.#*
