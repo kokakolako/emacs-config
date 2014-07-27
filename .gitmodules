@@ -1,9 +1,20 @@
-[submodule "plugins/erc-sasl"]
-	path = plugins/erc-sasl
-	url = https://github.com/joseph-gay/erc-sasl
-[submodule "plugins/org-git-link"]
-	path = plugins/org-git-link
-	url = git://github.com/ReimarFinken/org-git-link.git
-[submodule "org-mode"]
-	path = org-mode
+[submodule "themes/hemisu-theme"]
+	path = themes/hemisu-theme
+	url = https://github.com/andrzejsliwa/hemisu-theme
+    ignore = dirty
+[submodule "plugins/org-mode"]
+	path = plugins/org-mode
 	url = git://orgmode.org/org-mode.git
+    ignore = dirty
+[submodule "plugins/evil"]
+	path = plugins/evil
+	url = git://gitorious.org/evil/evil.git
+    ignore = dirty
+[submodule "plugins/slime"]
+	path = plugins/slime
+	url = https://github.com/slime/slime
+    ignore = dirty
+[submodule "plugins/emacs-2048"]
+	path = plugins/emacs-2048
+	url = https://github.com/sprang/emacs-2048
+    ignore = dirty

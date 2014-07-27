@@ -6,6 +6,25 @@
   '(tab-width 4)
   '(wg-emacs-exit-save-behavior nil)
 )
+; Packages
+; -----------------------------------------------------
+
+(require 'package)
+(package-initialize)
+
+(setq package-archives '(
+    ("gnu" . "http://elpa.gnu.org/packages/")
+    ("marmalade" . "http://marmalade-repo.org/packages/")
+    ("melpa" . "http://melpa.milkbox.net/packages/")
+))
+
+;; Adding Plugins to path
+(add-to-list 'load-path "~/.config/emacs/plugins/org-mode/" t)
+(add-to-list 'load-path "~/.config/emacs/plugins/org-mode/contrib/lisp/" t)
+
+;; SLIME
+(add-to-list 'load-path "~/.config/emacs/plugins/slime/" t)
+(require 'slime-autoloads)
 
 ; Font
 ; -----------------------------------------------------
@@ -14,16 +33,24 @@
   '(default ((t (:height 110 :family "Inconsolata for Powerline"))))
   '(magit-item-highlight ((t (:background "black"))))
 )
+(add-to-list 'default-frame-alist '(font . "Inconsolata for Powerline-12"))
+
+
+; Colorscheme
+; -----------------------------------------------------
+
+;; Adding Colorschemes to path
+(add-to-list 'load-path "~/.config/emacs/themes/hemisu-theme/" t)
+(add-to-list 'custom-theme-load-path "~/.config/emacs/themes" t)
+(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/hemisu-theme/" t)
+
+;; Load the Colorscheme
+(load-theme 'hemisu-light t)
 
 ; General Settings
 ; -----------------------------------------------------
 
 (setq visible-bell 1) ;; Disable bell
-
-(add-to-list 'default-frame-alist '(font . "Inconsolata for Powerline-12"))
-(add-to-list 'load-path "~/.config/emacs/plugins")
-(add-to-list 'load-path "~/.config/emacs/org-mode/lisp")
-(add-to-list 'load-path "~/.config/emacs/org-mode/contrib/lisp" t)
 
 (require 'org)
 (setq make-backup-files nil)
@@ -36,6 +63,7 @@
     browse-url-browser-function gnus-button-url
 )
 
+(transient-mark-mode 0)
 (tool-bar-mode 0)
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
@@ -89,13 +117,6 @@
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)) ;; From Emacs wiki
     (set-clipboard-coding-system 'utf-16le-dos) ;; MS Windows clipboard is UTF-16LE
 )
-
-; Theme
-; -----------------------------------------------------
-
-(add-to-list 'custom-theme-load-path "~/.config/emacs/themes")
-(load-theme 'wilson t)
-
 ; Clean up
 ; -----------------------------------------------------
 
@@ -118,18 +139,6 @@
 ; -----------------------------------------------------
 
 (setq tetris-score-file "~/.config/emacs/tetris-scores")
-
-; Packages
-; -----------------------------------------------------
-
-(require 'package)
-(package-initialize)
-
-(setq package-archives '(
-    ("gnu" . "http://elpa.gnu.org/packages/")
-    ("marmalade" . "http://marmalade-repo.org/packages/")
-    ("melpa" . "http://melpa.milkbox.net/packages/")
-))
 
 ; Init.el ends here
 ; -----------------------------------------------------
