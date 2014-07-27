@@ -138,7 +138,7 @@
 ; Tetris
 ; -----------------------------------------------------
 
-(setq tetris-score-file "~/.config/emacs/tetris-scores")
+(setq tetris-score-file "~/.config/emacs/cache/tetris-scores")
 
 ; Init.el ends here
 ; -----------------------------------------------------
