@@ -1,6 +1,15 @@
 session*
 tetris-scores
 .#*
+#*
 elpa
 eshell
 projectile*
+history
+org-clock-save.el
+authinfo.gpg
+recentf
+auto-save-list
+ido.last
+
+smex-items
