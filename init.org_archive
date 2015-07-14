@@ -1,0 +1,21 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/niklas/.config/emacs/init.org
+
+
+* Provide init.el
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2015-05-27 Mi 13:18
+  :ARCHIVE_FILE: ~/.config/emacs/init.org
+  :ARCHIVE_CATEGORY: init
+  :END:
+
+#+begin_src emacs-lisp :tangle yes
+(provide 'init)
+;;; init.el ends here
+#+end_src
+
+;; Local Variables:
+;; eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
+;; End:

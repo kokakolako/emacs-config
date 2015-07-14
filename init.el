@@ -24,14 +24,23 @@
 
 ;;; Code:
 
-;; Package-Management
+;;; Package-Management
 
 (require 'package)
 
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+	("melpa" . "http://melpa.org/packages/")
+	("marmalade" . "http://marmalade-repo.org/packages/")))
+
 (defvar package-list '(ace-jump-mode
 		       base16-theme
+		       bbdb
 		       company
 		       company-jedi
+		       elscreen
+		       emms
+		       emms-player-mpv
 		       expand-region
 		       evil
 		       flx-ido
@@ -41,22 +50,23 @@
 		       helm
 		       helm-projectile
 		       helm-swoop
-					 hydra
+		       hydra
+		       linum-relative
 		       magit
 		       markdown-mode
 		       paredit
+		       pretty-lambdada
+		       projectile
 		       rainbow-delimiters
 		       rainbow-mode
-		       projectile
 		       slime
 		       slime-company
+		       smart-mode-line
 		       smex
-		       undo-tree))
-
-(add-to-list 'package-archives
-	     '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives
-	     '("gnu" . "http://elpa.gnu.org/packages/") t)
+		       undo-tree
+		       wanderlust
+		       web-mode
+		       whole-line-or-region))
 
 (package-initialize)
 (unless package-archive-contents
@@ -65,20 +75,22 @@
   (unless (package-installed-p package)
     (package-install package)))
 
-;; Sane Defaults
+;;; Sane Defaults
 
-; Font
-(when (member "DejaVu Sans Mono" (font-family-list))
+;; Font
+(when (member "DenjaVu Sans Mono" (font-family-list))
   (set-face-attribute 'default nil :font "DejaVu Sans Mono"))
 
-; Hide GUI stuff
+;; Hide GUI stuff / Prettify scratch buffer
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tooltip-mode -1)
 (fringe-mode -1)
+(setq initial-scratch-message nil
+			inhibit-startup-screen t)
 
-;Misc
+;; Misc
 (load-theme 'base16-monokai-dark t)
 (fset 'yes-or-no-p 'y-or-n-p)
 (show-paren-mode t)
@@ -86,45 +98,48 @@
 (savehist-mode 1)
 (global-hl-line-mode 1)
 (global-flycheck-mode 1)
+(global-subword-mode 1)
+(global-superword-mode 1)
 (setq savehist-mode 1
       compilation-ask-about-save nil
       global-hl-line-mode t
-      inhibit-startup-screen t
-      initial-scratch-message nil
       make-backup-files nil
       show-trailing-whitespace t
-      echo-keystrokes 0.1)
+      echo-keystrokes 0.1
+      sentence-end-double-space nil)
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 
-; Resize windows
-(global-set-key (kbd "C-c h") 'shrink-window-horizontally)
-(global-set-key (kbd "C-c j") 'enlarge-window)
-(global-set-key (kbd "C-c k") 'shrink-window)
-(global-set-key (kbd "C-c l") 'enlarge-window-horizontally)
-
-; Instanlty quitting emacs using C-x C-c
-(global-set-key (kbd "C-x C-c") 'save-buffers-kill-emacs)
-
-; Store auto-save-files in the /temp directory
+;; Auto-save-files in the /temp directory
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
 
-; Auto saving
-(setq auto-save-interval 1)
-(add-hook 'focus-out-hook (lambda () (save-some-buffers t)))
+;; Auto saving
+;; (setq auto-save-interval 1)
+;; (add-hook 'focus-out-hook (lambda () (save-some-buffers t)))
 
-;;; Mode specific settings
+;;; Global Keybindings
 
-;; Undo-tree
+;; Fixing mappings for the use with a german keyboard layout
+(global-set-key (kbd "M-Q") 'mark-word)
+(global-set-key (kbd "C-M-5") 'query-replace-regexp)
 
-(require 'undo-tree)
-(global-undo-tree-mode)
-(global-set-key (kbd "C--") 'undo-tree-undo)
-(global-set-key (kbd "M--") 'undo-tree-redo)
-(defvar undo-dir (concat (getenv "HOME") "/.cache/emacs/undo/"))
-(setq undo-tree-auto-save-history)
+;; Switch buffers
+(global-set-key (kbd "M-o") 'other-window)
 
-;; Helm
+;; (defun join-line-and-kill-whitespace ()
+;;   "When point is at eol the lines are joined together
+;; with 'just' one space between them. Otherwise
+;; whitespace is shortened to one space."
+;;   (interactive)
+;;   (if (eq (point) (point-max))
+;;       (progn
+;; 				(kill-line)
+;; 				(just-one-space))
+;;     (just-one-space)))
+
+;; (global-set-key (kbd "M-<SPC>") 'join-line-and-kill-whitespace)
+
+;;; Helm
 
 (require 'helm)
 (defvar helm-buffers-fuzzy-matching t)
@@ -132,68 +147,83 @@
 (defvar recentf-exclude (list "/home/niklas/.emacs.d/elpa" "/usr/share/emacs"))
 (helm-autoresize-mode 1)
 (global-set-key (kbd "C-x C-b") 'helm-mini )
+(global-set-key (kbd "M-y") 'helm-show-kill-ring)
 
-;; Projectile (+ Helm)
+;;; Whole line or region
 
-(require 'projectile)
-(require 'helm-projectile)
-(projectile-global-mode)
-(helm-projectile-on)
-(defvar projectile-completion-system 'helm)
-(defvar projectile-globally-ignored-directories
-  `(,(concat user-emacs-directory "eshell")
-    ,(concat user-emacs-directory "elpa")
-    ,(concat user-emacs-directory "themes")
-		,(concat user-emacs-directory "auto-save-list")
-    "\\.git\\"
-    "\\.cache"))
-(defvar projectile-globally-ignored-files
-  '(,(concat user-emacs-directory "smex-items")
-    "\\#\\"))
+(whole-line-or-region-mode 1)
 
-;; AceJump
+;;; Smart Mode Line
+
+(setq sml/no-confirm-load-theme t)
+(sml/setup)
+
+;;; Undo-tree
+
+(require 'undo-tree)
+(global-undo-tree-mode)
+(setq undo-tree-history-directory-alist
+      '((".*" . "~/.cache/emacs/undo")))
+(setq undo-tree-auto-save-history t)
+(global-set-key (kbd "C-,") 'undo-tree-undo)
+(global-set-key (kbd "C-.") 'undo-tree-redo)
+
+;;; Company
+
+(require 'company)
+(global-company-mode 1)
+(setq company-idle-delay 0.1)
+(setq company-tooltip-limit 20)
+(setq company-echo-delay 0)
+(add-to-list 'company-backends 'company-dabbrev t)
+(add-to-list 'company-backends 'company-ispell t)
+(add-to-list 'company-backends 'company-files t)
+(add-to-list 'company-backends 'slime-company t)
+
+;; Some comfy mappings for company
+(define-key company-active-map (kbd "C-n") 'company-select-next)
+(define-key company-active-map (kbd "C-p") 'company-select-previous)
+(define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
+(define-key company-active-map (kbd "<tab>") 'company-complete)
+
+;;; AceJump
 
 (require 'ace-jump-mode)
-(global-set-key (kbd "C-c f") 'ace-jump-char-mode)
-(global-set-key (kbd "C-c C-f") 'avy-goto-char-2)
+(global-set-key (kbd "C-c C-f") 'ace-jump-mode)
 
-;; Flx
+;;; Flx
 
 (require 'flx-ido)
 (ido-mode 1)
 (ido-everywhere 1)
 (flx-ido-mode 1)
-(setq ido-enable-flex-matching t)
-(setq ido-use-faces nil)
+(setq ido-enable-flex-matching t
+      ido-use-faces nil)
+
+;;; Smex
+
+(require 'smex)
 (global-set-key (kbd "M-x") 'smex)
 
-;; Org
+;;; Org
 
 (require 'org)
+(add-hook 'org-mode-hook (lambda ()
+			   (interactive)
+			   (linum-mode 1)
+			   (local-unset-key (kbd "C-,"))
+			   (define-key org-mode-map (kbd "C-,") 'undo-tree-undo)))
+(setq org-hide-leading-stars 'hidestars
+      org-return-follows-links t)
+(add-to-list 'org-modules "org-habit")
+(setq org-agenda-files '("~/org"))
 
-; Global mappings
+;; Global mappings
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c l") 'org-store-link)
-(global-set-key (kbd "C-c b") 'org-iswitchb)
 
-(setq org-hide-leading-stars 'hidestars)
-(defvar org-return-follows-links t)
-
-; TODO-States
-(setq org-todo-keywords
-      '((sequence "TODO(t)" "STARTED(s!)" "DELAY(g@/!)"
-		  "|" "DONE(d!)" "CANCELED(c@)")))
-(setq org-todo-keyword-faces
-      '(("TODO" . (:foreground "#FF0055" :weight bold))
-	("STARTED" (:foreground "#FF4000" :weight bold))
-	("DELAY" (:foreground "#4EB4FA" :weight bold))
-	("DONE" (:foreground "#B1D631" :weight bold))
-	("CANCELED" (:foreground "#ED0028" :weight bold))
-	("APPn" (:foreground "#7E40A5" :weight bold))))
-(setq org-log-done 'time)
-
-; Babel
+;; Babel
 (setq org-confirm-babel-evaluate nil)
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -202,102 +232,162 @@
    (scheme . t)
    (lisp . t)
    (emacs-lisp . t)))
+(defvar org-bable-scheme-command "racket")
 
-; Clocking
-(add-hook 'org-mode-hook (lambda ()
-			   (interactive)
-			   (define-key org-mode-map (kbd "C-c C-i") 'org-clock-in)
-			   (define-key org-mode-map (kbd "C-c C-o") 'org-clock-out)))
-(org-clock-persistence-insinuate)
-(defvar org-clock-history-length 35)
-(defvar org-clock-in-resume t)
-(defvar org-clock-persist t)
-(defvar org-agenda-start-with-clockreport-mode t)
-(defvar org-agenda-clockreport-parameter-plist (quote (:link t :maxlevel 4)))
-
-; Agenda
-(setq org-agenda-files '("~/org/"))
-(defvar org-agenda-skip-deadline-if-done t)
-(defvar org-agenda-skip-scheduled-if-done t)
-(defvar org-log-into-drawer t)
-(defvar org-agenda-filter-preset '(-someday))
-(defvar org-agenda-span 1)
-
-;; Emacs Lisp
-
-(defun load-current-buffer ()
-  "Save and load the current buffer."
-  (interactive)
-  (save-buffer)
-  (load-file (buffer-file-name)))
+;;; Emacs Lisp
 
 (add-hook 'emacs-lisp-mode-hook
 	  (lambda ()
 	    (interactive)
 	    (paredit-mode 1)
 	    (linum-mode 1)
-	    (pretty-lambda-mode 1)
-	    (define-key emacs-lisp-mode-map (kbd "C-c C-k") 'load-current-buffer)))
+	    (pretty-lambda-mode 1)))
 
-;; Python
+(defun load-current-buffer ()
+  "Save and load the current buffer."
+  (interactive)
+  (save-buffer)
+  (load-file (buffer-file-name)))
+(define-key emacs-lisp-mode-map (kbd "C-c C-k") 'load-current-buffer)
+
+;;; Web Mode
+
+(require 'web-mode)
+(add-hook 'css-mode-hook (lambda () (web-mode)))
+(add-hook 'html-mode-hook (lambda () (web-mode)))
+
+;;; Python
+
 (require 'python)
 (add-hook 'python-mode-hook (lambda () (linum-mode 1)))
 
-;; Scheme
+;;; Scheme
+
 (add-hook 'scheme-mode-hook (lambda ()
 			      (interactive)
 			      (linum-mode 1)
 			      (pretty-lambda-mode 1)
 			      (paredit-mode 1)))
-;; Geiser
 
-(defvar geiser-default-implementation 'racket)
-(defvar active-implementation 'racket)
-(defvar org-bable-scheme-command "racket")
+;;; Geiser
 
-;; Company
+(defvar geiser-active-implementations '(racket))
+(defvar geiser-mode-autodoc-p nil)
+(add-hook 'geiser-repl-mode-hook (lambda ()
+				   (interactive)
+				   (paredit-mode 1)
+				   (hl-line-mode -1)))
 
-(require 'company)
-(add-hook 'after-init-hook 'global-company-mode)
-(setq company-idle-delay 0.1)
-(setq company-tooltip-limit 20)
-(setq company-echo-delay 0)
-(add-to-list 'company-backends 'company-dabbrev t)
-(add-to-list 'company-backends 'company-ispell t)
-(add-to-list 'company-backends 'company-files t)
-
-;; Rainbow-Delimiters
+;;; Rainbow-Delimiters
 
 (require 'rainbow-delimiters)
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
-;; SLIME
+;;; Slime
 
 (require 'slime-autoloads)
 (defvar inferior-lisp-program "sbcl")
 (setq slime-contribs '(slime-scratch slime-editing-commands slime-repl))
+(slime-setup '(slime-fancy))
+(defvar slime-use-autodoc-mode nil)
+(add-hook 'slime-mode-hook (lambda ()
+			     (interactive)
+			     (linum-mode 1)
+			     (paredit-mode 1)))
 
 ;;; Assign the Common Lisp filetype (".cl") to slime
 (add-to-list 'auto-mode-alist '("\\.cl\\'" . slime-mode))
 (add-to-list 'auto-mode-alist '("\\.cl\\'" . lisp-mode))
 
-;; Rice
+;;; BBDB
+
+(require 'bbdb)
+(bbdb-initialize)
+
+;;; EMMS
+
+(require 'emms-setup)
+(require 'emms-player-mpv)
+(emms-all)
+(emms-default-players)
+(setq emms-source-file-default-directory "~/music"
+      emms-player-list '(emms-player-mpv))
+
+;;; Eshell
+
+(defvar eshell-prompt-function (lambda ()
+				 (concat (propertize (eshell/pwd) 'face `(:foreground "#66d9ef"))
+					 (propertize " λ" 'face `(:foreground "#f92672"))
+					 (propertize " " 'face `(:foreground "#f9f8f5")))))
+(defvar eshell-highlight-prompt nil)
+
+;;; Relative Line Numbers
+
+(require 'linum-relative)
+(setq linum-relative-current-symbol "")
+
+;;; Wanderlust
+
+(autoload 'wl "wl" "Wanderlust" t)
+
+;;; Elscreen
+
+(elscreen-start)
+(setq elscreen-tab-display-control nil
+      elscreen-tab-display-kill-screen nil
+      elscreen-display-tab nil)
+
+;;; Projectile (+ Helm)
+
+(require 'projectile)
+(require 'helm-projectile)
+(projectile-global-mode 1)
+(helm-projectile-on)
+(defvar projectile-completion-system 'helm)
+(defvar projectile-globally-ignored-directories
+  `(,(concat user-emacs-directory "eshell")
+    ,(concat user-emacs-directory "elpa")
+    ,(concat user-emacs-directory "themes")
+    ,(concat user-emacs-directory "auto-save-list")
+    "\\.git\\"
+    "\\.cache"))
+(defvar projectile-globally-ignored-files
+  '(,(concat user-emacs-directory "smex-items")
+    "\\#\\"))
+
+;;; Rice
+
 (custom-set-faces
- ;;; company
  '(company-preview-common ((t (:background "#383830" :foreground "#75715e"))))
- '(company-tooltip ((t (:background "#383830" :foreground "#f9f8f5"))))
- '(company-tooltip-selection ((t (:background "#383830" :foreground "#f92672"))))
- '(company-tooltip-common ((t (:background "#383830" :foreground "#75715e"))))
- '(company-tooltip-common-selection ((t (:background "#383830" :foreground "#66d9ef"))))
  '(company-scrollbar-bg ((t (:background "#49483e"))))
  '(company-scrollbar-fg ((t (:background "#a59f85"))))
- ;;; hl-line+
- '(hl-line ((t (:background "#383830"))))
- ;;; helm
- '(helm-selection ((t (:foreground "#f92672"))))
+ '(company-tooltip ((t (:background "#383830" :foreground "#f9f8f5"))))
+ '(company-tooltip-annotation ((t (:background "#383830" :foreground "#66d9ef"))))
+ '(company-tooltip-common ((t (:background "#383830" :foreground "#75715e"))))
+ '(company-tooltip-common-selection ((t (:background "#383830" :foreground "#66d9ef"))))
+ '(company-tooltip-selection ((t (:background "#383830" :foreground "#f92672"))))
+ '(elscreen-tab-background-face ((t (:background "#383830"))))
+ '(elscreen-tab-current-screen-face ((t (:background "#66d9ef" :foreground "#49483e"))))
+ '(helm-buffer-file ((t (:foreground "#a59f85"))))
+ '(helm-buffer-process ((t (:foreground "#a6e22e"))))
+ '(helm-buffer-size ((t (:foreground "#a6e22e"))))
  '(helm-candidate-number ((t (:foreground "#a59f85"))))
- '(helm-source-header ((t (:foreground "#fd971f")))))
+ '(helm-header ((t (:foreground "#a6e22e"))))
+ '(helm-helper ((t (:foreground "#a6e22e"))))
+ '(helm-selection ((t (:background "#49483e"))))
+ '(helm-source-header ((t (:foreground "#f92672"))))
+ '(helm-visible-mark ((t (:background "#a59f85" :foreground "#49483e"))))
+ '(hl-line ((t (:background "#383830"))))
+ '(linum-relative-current-face ((t (:background "#49483e" :foreground "#fd971f"))))
+ '(mode-line ((t (:background "#49483e"))))
+ '(mode-line-inactive ((t (:background "#000"))))
+ '(sml/filename ((t (:foreground "#f8f8f2"))))
+ '(sml/folder ((t (:foreground "#a59f85"))))
+ '(sml/git ((t (:foreground "#f92671"))))
+ '(sml/line-number ((t (:foreground "#a6e22e"))))
+ '(sml/modified ((t (:foreground "#66d9ef"))))
+ '(sml/position-percentage ((t (:foreground "#a6e22e"))))
+ '(sml/prefix ((t (:foreground "#f92671")))))
 
 (provide 'init)
 ;;; init.el ends here
-
